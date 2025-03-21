@@ -4,7 +4,7 @@ import googlemaps
 import polyline
 from datetime import datetime
 
-gmaps = googlemaps.Client(key='AIzaSyBEYZuox2CwkJRgPdE0l6zNnVYKXMdqshg')
+gmaps = googlemaps.Client(key='AIzaSyCDpwsvoNd-l0OiNsYGRsoeke5ob_TOZUA')
 
 # Load the crime dataset into a Pandas dataframe
 crime_data = pd.read_csv('Updated_Crimes.csv')
