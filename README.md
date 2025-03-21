@@ -20,7 +20,7 @@ This tool is ideal for researchers, urban planners, and safety-conscious individ
 - 🛣 Route Alternatives – Up to **three routes** shown per query.
 - 🔴 Route Safety Colouring:
   - Red = shortest route  
-  - Blue = alternative  
+  - Blue = alternative
   - Black = another option  
   - ✅ Green = safest route (least crime)
 - 📍 Crime Markers – Visualised near routes, with popups showing detail.
