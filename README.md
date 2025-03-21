@@ -21,7 +21,7 @@ This tool is ideal for researchers, urban planners, and safety-conscious individ
 - 🔴 Route Safety Colouring:
   - Red = shortest route  
   - Blue = alternative
-  - Black = another option  
+  - Orange= another option  
   - ✅ Green = safest route (least crime)
 - 📍 Crime Markers – Visualised near routes, with popups showing detail.
 - 🗺 Layer Control – Switch between OpenStreetMap, Stamen, and Carto tile layers.
@@ -129,7 +129,6 @@ This will display up to 3 route options between **Freedom Square Playground** an
 ## 🗺️ Map Output
 
 - Up to **3 routes** plotted on the map  
-- Crime markers near the route (within ~500m)  
 - Colour-coded routes with start/end points  
 - Clickable steps and popups for direction and risk details  
 - Switchable basemaps
@@ -194,7 +193,6 @@ These settings can be found in either `route.py` or `draw_map.py`.
 
 | Parameter         | Description                                                      | Default / Example |
 |-------------------|------------------------------------------------------------------|-------------------|
-| `search_radius_m` | Radius (in metres) to filter nearby crimes along each route      | `500`             |
 | `max_routes`      | Maximum number of alternative routes to display (1–3)            | `3`               |
 
 ### 🎨 draw_map.py
@@ -203,7 +201,7 @@ These settings can be found in either `route.py` or `draw_map.py`.
 |----------------------|------------------------------------------------------------|----------------------------------|
 | `map_center`         | Default map centre coordinates when the app starts         | `[40.730610, -73.935242]` (NYC) |
 | `zoom_start`         | Initial zoom level for the map                             | `12`                             |
-| `route_colors`       | Colours used for drawing each route (in order)             | `['Red', 'Blue', 'Black']`       |
+| `route_colors`       | Colours used for drawing each route (in order)             | `['Red', 'Blue', 'Orange']`       |
 | `safest_route_color` | Colour used to highlight the safest route                  | `'Green'`                        |
 | `crime_icon_color`   | Marker icon colour for crime locations                     | `'red'`                          |
 | `tile_layers`        | List of base map layers user can switch between            | `OpenStreetMap`, `Stamen`, etc. |

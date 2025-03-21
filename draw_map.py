@@ -18,7 +18,7 @@ def get_map(source, destination):
     )
 
     # Add route polylines
-    colors = ['Red', 'Blue', 'Black']
+    colors = ['Red', 'Blue', 'Orange']
     for idx, color in enumerate(colors):
         route_points = top_routes[idx]['route_points']
         folium.PolyLine(
@@ -95,28 +95,23 @@ def get_map(source, destination):
 
     # Add optional tile layers
     folium.TileLayer(
-        tiles='Stamen Terrain',
-        name='Stamen Terrain',
-        attr='Map tiles by Stamen Design, CC BY 3.0 — Map data © OpenStreetMap'
+        tiles='OpenStreetMap',
+        name='OpenStreetMap',
+        attr='© OpenStreetMap contributors'
     ).add_to(nyc_map)
 
     folium.TileLayer(
-        tiles='Stamen Toner',
-        name='Stamen Toner',
-        attr='Map tiles by Stamen Design, CC BY 3.0 — Map data © OpenStreetMap'
+        tiles='CartoDB dark_matter',
+        name='CartoDB Dark',
+        attr='© OpenStreetMap contributors, © CartoDB'
     ).add_to(nyc_map)
 
     folium.TileLayer(
-        tiles='Stamen Watercolor',
-        name='Stamen Watercolor',
-        attr='Map tiles by Stamen Design, CC BY 3.0 — Map data © OpenStreetMap'
+        tiles='CartoDB positron',
+        name='CartoDB Positron',
+        attr='© OpenStreetMap contributors, © CartoDB'
     ).add_to(nyc_map)
 
-    folium.TileLayer(
-        tiles='cartodbdark_matter',
-        name='Carto Dark',
-        attr='Map tiles by CartoDB, under CC BY 3.0. Data © OpenStreetMap'
-    ).add_to(nyc_map)
 
     # Add layer control (for toggling base maps)
     folium.LayerControl().add_to(nyc_map)
