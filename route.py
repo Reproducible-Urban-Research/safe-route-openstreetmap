@@ -6,124 +6,106 @@ from datetime import datetime
 
 gmaps = googlemaps.Client(key='AIzaSyCDpwsvoNd-l0OiNsYGRsoeke5ob_TOZUA')
 
-# Load the crime dataset into a Pandas dataframe
+# Load the crime dataset
 crime_data = pd.read_csv('Updated_Crimes.csv')
-
-# Extract the latitude and longitude columns and the total crime column
+total_crime = crime_data['Total Crime']
 crime_locs = crime_data[['Latitude', 'Longitude']]
 
-
-
-total_crime = crime_data['Total Crime']
-
-latitudes = crime_data['Latitude']
-longitudes = crime_data['Longitude']
-
-
-# murders = crime_data['Murder ']
-# raps = crime_data['Rape']
-# robbery = crime_data['Robbery']
-# kidnapping = crime_data['Kidnapping']
-# harassment = crime_data['Harassment']
-
-mask = []
-
-def crime_list(route_points, crime_data):
+# === Crime marker tag function ===
+def crime_list(route_points, crime_df):
     crimes_tags_list = []
-    all_crime_numbers = []
-    all_locations = []
+    seen = set()
     for p in route_points:
-        row_mask = (np.isclose(crime_data['Latitude'], p[0], rtol=1e-3)) & (np.isclose(crime_data['Longitude'], p[1], rtol=1e-3))                           
-        total_crime_number = total_crime[(np.isclose(crime_locs['Latitude'], p[0], rtol=1e-3)) & 
-                          (np.isclose(crime_locs['Longitude'], p[1], rtol=1e-3))].sum()         
-        # if True in row_mask:
-        #     print ("YES: ", total_crime_number)        
-        if True in row_mask and total_crime_number>0 and total_crime_number not in all_crime_numbers:
-            all_crime_numbers.append(total_crime_number)
-            #print("HERE")
-            lati = crime_data['Latitude'][row_mask].values[0]
-            longi = crime_data['Longitude'][row_mask].values[0]
-            if (lati, longi) in all_locations:
+        row_mask = (np.isclose(crime_df['Latitude'], p[0], rtol=1e-3)) & \
+                   (np.isclose(crime_df['Longitude'], p[1], rtol=1e-3))
+
+        if True in row_mask:
+            lat = crime_df['Latitude'][row_mask].values[0]
+            lon = crime_df['Longitude'][row_mask].values[0]
+
+            if (lat, lon) in seen:
                 continue
-            all_locations.append(  (lati, longi) )
-            crimes_tags = {
-                'Murder' : crime_data['Murder '][row_mask].values[0],
-                'Raps' : crime_data['Rape'][row_mask].values[0],
-                'Robbery' : crime_data['Robbery'][row_mask].values[0],
-                'Kidnapping' : crime_data['Kidnapping'][row_mask].values[0],
-                'Harassment' : crime_data['Harassment'][row_mask].values[0],
-                'Latitude' : lati,
-                'Longitude' : longi
-            }       
-            all_zeroes = False
-            for k, v in crimes_tags.items():
-                if k.lower() in ['latitude', 'longitude']:
-                    continue
-                if v !=0:
-                    all_zeroes=True
-            if all_zeroes:          
-                crimes_tags_list.append(crimes_tags)
-        crime_data = crime_data.drop(crime_data[row_mask].index)        
+            seen.add((lat, lon))
+
+            tag = {
+                'Murder': crime_df['Murder '][row_mask].values[0],
+                'Rape': crime_df['Rape'][row_mask].values[0],
+                'Robbery': crime_df['Robbery'][row_mask].values[0],
+                'Kidnapping': crime_df['Kidnapping'][row_mask].values[0],
+                'Harassment': crime_df['Harassment'][row_mask].values[0],
+                'Latitude': lat,
+                'Longitude': lon
+            }
+
+            if any(tag[k] != 0 for k in ['Murder', 'Rape', 'Robbery', 'Kidnapping', 'Harassment']):
+                crimes_tags_list.append(tag)
+
+            crime_df = crime_df.drop(crime_df[row_mask].index)
+
     print("tags count:", len(crimes_tags_list))
-    return crimes_tags_list, crime_data
+    return crimes_tags_list, crime_df
 
-
+# === Sum route crime ===
 def sum_crime_for_route(route_points):
-    # Calculate the sum of total crimes for each point in the route that exists in the dataset
-    crimes = [total_crime[(np.isclose(crime_locs['Latitude'], p[0], rtol=1e-3)) & 
-                          (np.isclose(crime_locs['Longitude'], p[1], rtol=1e-3))].sum() 
-             for p in route_points]
+    crimes = [
+        total_crime[
+            (np.isclose(crime_locs['Latitude'], p[0], rtol=1e-3)) &
+            (np.isclose(crime_locs['Longitude'], p[1], rtol=1e-3))
+        ].sum()
+        for p in route_points
+    ]
     return sum(crimes)
 
+# === Probability ===
 def crime_probability(sum_crime):
-    # Calculate the probability of crime occurrence based on the crime statistics in the dataset
-    total_crime_sum = total_crime.sum()
-    prob = (sum_crime / total_crime_sum) if total_crime_sum > 0 else 0
-    return prob
+    total_sum = total_crime.sum()
+    return (sum_crime / total_sum) if total_sum > 0 else 0
 
+# === Main route function ===
 def get_top_routes(start_loc, end_loc):
-    # Get directions between start and end locations
-    directions_result = gmaps.directions(start_loc, end_loc, mode="driving", departure_time=datetime.now(), alternatives=True)  # Request multiple routes
+    directions_result = gmaps.directions(
+        start_loc, end_loc,
+        mode="driving",
+        departure_time=datetime.now(),
+        alternatives=True
+    )
 
-    dynamic_crime_data = pd.read_csv('Updated_Crimes.csv')
-
+    dynamic_crime_data = crime_data.copy()
     routes = []
+
     for route in directions_result:
         duration = route['legs'][0]['duration']['value']
+        steps = route['legs'][0]['steps']
         route_points = []
-        steps = []
-        for step in route['legs'][0]['steps']:
-            steps.append(step)
-            encoded_polyline = step['polyline']['points']
-            decoded_polyline = polyline.decode(encoded_polyline)
-            route_points.extend(decoded_polyline)
+
+        for step in steps:
+            decoded = polyline.decode(step['polyline']['points'])
+            route_points.extend(decoded)
+
         sum_crime = sum_crime_for_route(route_points)
-        crimes_tags_list, dynamic_crime_data = crime_list(route_points, dynamic_crime_data)       
+        tags, dynamic_crime_data = crime_list(route_points, dynamic_crime_data)
         prob = crime_probability(sum_crime)
-        routes.append({'steps': steps, 'duration': duration, 'points': route_points, 'probability': prob, 'tags': crimes_tags_list})
 
-    # Return the top three routes based on crime probability
-    # sorting largest to smallest
-    sorted_routes = sorted(routes, key=lambda r: r['probability'], reverse=True)
-    top_routes = sorted_routes[:3]
-    top_routes.append(sorted_routes[-1])
-    # Extract the route points for each of the top routes
-    top_route_points = []
-    top_steps = []
-    for route in top_routes:
-        top_route_points.append(route['points'])
-        top_steps.append(route['steps'])
-    
-    # Return the top three routes along with the route points, duration, and probability
+        routes.append({
+            'steps': steps,
+            'duration': duration,
+            'points': route_points,
+            'probability': prob,
+            'tags': tags
+        })
+
+    # Sort by risk, add safest to end
+    sorted_routes = sorted(routes, key=lambda x: x['probability'], reverse=True)
+    top_3 = sorted_routes[:3]
+    top_3.append(sorted_routes[-1])  # safest one at end
+
     return [
-        {'steps': top_steps,'route_points': points, 'duration': route['duration'], 'probability': route['probability'], 'tags': route['tags']}         
-            for points, route in zip(top_route_points, top_routes)] 
-
-
-
-# for i, route in enumerate(top_routes):
-#     print(f"Route {i+1}: {route['route_points']}, duration={route['duration']}s, probability={route['probability']}")
-
-# start_loc = 'FREEDOM SQUARE PLAYGROUND, NY'
-# end_loc = 'BLEECKER PLAYGROUND, NY'
-# crimes_rates = get_top_routes(start_loc, end_loc)
+        {
+            'steps': r['steps'],
+            'route_points': r['points'],
+            'duration': r['duration'],
+            'probability': r['probability'],
+            'tags': r['tags']
+        }
+        for r in top_3
+    ]
