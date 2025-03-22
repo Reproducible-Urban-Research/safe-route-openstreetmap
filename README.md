@@ -6,6 +6,11 @@
 
 This tool is ideal for researchers, urban planners, and safety-conscious individuals seeking routes that balance distance and safety. It visualises routes using **Folium** (Leaflet.js for Python), with layered maps and interactive crime markers.
 
+![Preview](https://raw.githubusercontent.com/Reproducible-Urban-Research/safe-route-openstreetmap/main/media/example1_BroadwayJunction_to_UnionSquare.png)
+
+![Preview](https://raw.githubusercontent.com/Reproducible-Urban-Research/safe-route-openstreetmap/main/media/example2_BroadwayJunction_to_GuggenheimMuseum.png)
+
+
 ---
 
 ## ✅ Features
@@ -18,11 +23,11 @@ This tool is ideal for researchers, urban planners, and safety-conscious individ
 ### ⚙️ Functionality
 
 - 🛣 Route Alternatives – Up to **three routes** shown per query.
-- 🔴 Route Safety Colouring:
-  - Red = shortest route  
-  - Blue = alternative
-  - Orange= another option  
-  - ✅ Green = safest route (least crime)
+- 🎨 Route Safety Colouring:
+  - 🔴 Red = shortest route  
+  - 🔵 Blue = alternative
+  - 🟠 Orange= another option  
+  - 🟢 Green = safest route (least crime)
 - 📍 Crime Markers – Visualised near routes, with popups showing detail.
 - 🗺 Layer Control – Switch between OpenStreetMap, Stamen, and Carto tile layers.
 - 📌 Start/End Markers – Clearly labelled on the map.
